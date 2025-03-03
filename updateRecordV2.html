@@ -1,0 +1,209 @@
+<template>
+    <!-- Title -->
+    <div class="slds-box" style="background-color: white; border-style: solid;">
+      <h3 class="slds-align_absolute-center slds-p-around_large slds-text-title_bold" style="border-style: inset; background-color: #27639b; color: white;">Record Update</h3>
+    <!-- End of Title -->
+      <br>
+    
+      <!-- Picklist to select retrieved objects stored in "getObjectOptions" -->
+      <div style="border-style: inset;" class="slds-p-around_medium">
+        <div style="border-style: ridge;" class="slds-p-around_medium">
+      <!-- <legend class="slds-text-title_bold slds-m-bottom_x-small slds-m-top_small">Select Object</legend> -->
+      <strong><lightning-combobox label="Select Object" class="slds-p-top_x-small" name="progress" value={value} placeholder="Select Object" options={getObjectOptions} onchange={handleObjectChange}></lightning-combobox></strong>
+      <!-- End of Object Picklist -->
+        <br>
+    <!-- Template to select fields for the selected object above which are stored in "getFieldOptions" -->
+    <template if:true={value}>
+      <lightning-dual-listbox name="fields" label="Select Fields" source-label="Available" selected-label="Selected" field-level-help="Select your preferred fields" options={getFieldOptions} onchange={handleFieldChange}></lightning-dual-listbox>
+    <!-- End of fields listbox -->
+      
+    <br>
+
+    <!-- Button to fetch the records from the selected object and fields -->
+      <lightning-button variant="brand" label="Show Records" title="Show Records" onclick={handleShowData}></lightning-button><br>
+    <!-- End of Button -->
+    </template>
+
+  </div>
+
+    <!-- Template to filter records -->
+    <template if:true={fieldValue}>
+      <br>
+      <div style="border-style: ridge;" class="slds-p-around_medium">
+      <div class="container-fluid">
+          <div class="slds-float_right slds-p-bottom_small">
+              <lightning-button class="slds-page-header__title" label="Add Filter" onclick={addRow}></lightning-button>
+          </div>
+          <div class="container-fluid">
+            <br>
+            <template if:true={showCondition}> 
+                <lightning-combobox
+                      label="Condition Requirements"
+                      data-id={indx}
+                      name="operator"
+                      value={selectedCondition}
+                      variant=”label-hidden”
+                      options={conditions}
+                      onchange={handleConditionChange}
+                      placeholder="Select Condition"
+                      required="true">
+                  </lightning-combobox>
+                  <template if:true={showCustomLogic}>
+                  <lightning-input label="Condition Logic" data-id={indx} value={customLogic} onchange={handleLogicChange} field-level-help="Use parentheses, AND and OR to customize the logic. For example, if you enter “(0 AND 1 AND 2) OR 3”, the flow evaluates whether the first three conditions are true or only the fourth condition is true." placeholder="(0 AND 1) OR (2 AND 3)"></lightning-input>
+                </template>
+              <br>
+            </template>
+              <table class="slds-table slds-table_bordered slds-table_cell-buffer filters">
+                  <thead>
+                      <tr class="slds-text-title_caps">
+                        <th scope="col">
+                          <div class="slds-truncate" title="Field Name">Index</div>
+                        </th>
+                        <th scope="col">
+                          <div class="slds-truncate" title="Field Name">Field</div>
+                        </th>
+                        <th scope="col">
+                          <div class="slds-truncate" title="Search Text">Is Number Field?</div>
+                        </th>
+                        <th scope="col">
+                          <div class="slds-truncate" title="Field Name">Operator</div>
+                        </th>
+                        <th scope="col">
+                          <div class="slds-truncate" title="Search Text">Value</div>
+                        </th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={checkFilter} for:item="chk" for:index="indx">
+                          <tr key={chk.key} id={chk.key}>
+                            <td>{indx}</td>
+                              <td>
+                                  <lightning-combobox
+                                  data-id={indx}
+                                  name="filter"
+                                  value={selectedValue}
+                                  variant=”label-hidden”
+                                  options={getFieldOptions}
+                                  onchange={handleFeldNameChange}
+                                  placeholder="Select Field">
+                              </lightning-combobox>
+                          </td>
+
+                          <td>
+                            <lightning-combobox
+                                data-id={indx}
+                                name="checkbox"
+                                value={selectedCheckbox}
+                                variant=”label-hidden”
+                                options={checkboxes}
+                                onchange={handleCheckboxChange}
+                                placeholder="IS NUMERIC?">
+                            </lightning-combobox>
+                          </td>
+
+                          <td>
+                            <lightning-combobox
+                                  data-id={indx}
+                                  name="operator"
+                                  value={selectedOperator}
+                                  variant=”label-hidden”
+                                  options={chk.Options}
+                                  onchange={handleOperatorChange}
+                                  placeholder="Select operator">
+                              </lightning-combobox>
+                          </td>
+
+                            <td>
+                                  <lightning-input data-id={indx} value={chk.SearchText} onchange={handleTextBoxChange}></lightning-input>
+                              </td>	
+                              <td>
+                                <div class="slds-m-left " style="margin-top: 18px;" >
+                                <lightning-button-icon icon-name="utility:delete"
+                                
+                                                                        
+                                                                          data-id={indx}       
+                                                                          alternative-text="Delete"     
+                                                                          class="slds-m-left_xx-small"
+                                                                          
+                                                                          onclick={removeRow} 
+                                                                          
+                                                                          title="Delete"
+                                                                          ></lightning-button-icon>
+                                                                        </div>
+                            </td>
+                            </tr>
+                      </template>
+                  </tbody>
+              </table>
+              <template if:true={filterButton}>
+              <div class="slds-align_absolute-center slds-p-top_small">
+                  <lightning-button name="Save" label="Filter" onclick={saveRecord} ></lightning-button>
+              </div>
+            </template>
+          </div>
+      </div>
+    </div>
+</template>
+
+<!-- End of Filter template -->
+
+
+
+
+
+
+
+
+
+  <!-- Template for Datatable of retrieved records -->
+    <template if:true={showDatable}>
+      <br>
+      <div style="border-style: ridge;" class="slds-p-around_medium">
+     
+        <div class="card">
+      <!-- Global search box-->
+      <div style="height: 300px;">
+        <lightning-input type="search" placeholder="Search Record" onchange={handleSearch}></lightning-input>
+        <div style="height: 250px;" >
+        <lightning-datatable class="slds-table_col-bordered" key-field="id" data={recordsList} show-row-number-column row-number-offset={rowOffset} suppress-bottom-bar columns={columns} onrowaction={callRowAction} hide-checkbox-column=true></lightning-datatable>
+      </div>
+      </div>
+
+    </div>
+  </div>
+    </template>
+    <template if:true={showmodel}>
+      <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closem}>
+              <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+              <span class="slds-assistive-text">Close</span>
+            </button>
+            <h2 class="slds-text-heading_medium slds-hyphenate">Edit {value}</h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium">
+            <lightning-record-edit-form record-id={record} object-api-name={value} onsuccess={handleSuccess} onsubmit={handleSubmit} onerror={handleError}>
+              <template for:each={names} for:item="name">
+                <p key={name.fieldName}>
+                  <lightning-input-field field-name={name.fieldName}></lightning-input-field>
+                </p>
+              </template>
+              <footer class="slds-modal__footer">
+                <!-- <template if:false={showBtn}> -->
+                <lightning-button type="submit" variant="brand" label="Save"></lightning-button>
+              </footer>
+            </lightning-record-edit-form>
+          </div>
+          <!-- modal footer start-->
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+  </div>
+</div>
+  </template>
+
+  <!-- End of Datatable-->
